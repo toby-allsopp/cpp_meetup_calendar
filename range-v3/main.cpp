@@ -71,6 +71,16 @@ dates_in_year(unsigned short year)
 }
 #endif
 
+#include <range/v3/experimental/utility/generator.hpp>
+
+template <typename Rng, typename Pred>
+experimental::generator<date> filter(Rng rng, Pred pred)
+{
+    for (auto x : rng)
+        if (pred(x))
+            co_yield x;
+}
+
 auto by_month()
 {
   return view::group_by([](date const& a, date const& b)
@@ -129,7 +139,7 @@ int main()
     if (switchOnlyMondays)
         //rng = rng | view::filter(is_sunday{});
     // This one does *not* crash
-        rng = rng | view::filter([](date d) { return d.day_of_week() == 0; });
+        rng = filter(rng, [](date const& d) { return d.day_of_week() == 0; });
     // Having "auto const& day" here does *not* crash!!!
     for (auto const& day : rng)
         std::cout << day << std::endl;
